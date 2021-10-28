@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -15,108 +17,48 @@ use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
-    function __construct()
-    {
-        $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index', 'show']]);
-        $this->middleware('permission:user-create', ['only' => ['create', 'store']]);
-        $this->middleware('permission:user-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:user-delete', ['only' => ['destroy']]);
-    }
-
     /**
-     * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @return Application|Factory|View
+     * @return User[]|Collection
      */
-    public function index(Request $request): View|Factory|Application
+    public function index(): Collection|array
     {
-        $data = User::orderBy('id', 'DESC')->paginate(5);
-        return view('users.index', compact('data'));
+        return User::all();
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return Application|Factory|View
-     */
-    public function create(): View|Factory|Application
-    {
-        return view('users.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
      * @param Request $request
-     * @return RedirectResponse
+     * @return mixed
      * @throws ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $this->validate($request, [
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|same:confirm-password',
-            'image' => 'mimes:jpg,jpeg,png|max:8096'
+            'date_of_birth' => 'required|date',
         ]);
 
-        $input = $request->all();
-        $input['password'] = Hash::make($input['password']);
-
-        $user = User::create($input);
-
-        return redirect()->route('users.index')
-            ->with('success', 'User created successfully');
+        return User::create($request->all());
     }
 
     /**
-     * Display the specified resource.
-     *
      * @param int $id
-     * @return Application|Factory|View
+     * @return mixed
      */
-    public function show(int $id): View|Factory|Application
+    public function show(int $id): mixed
     {
-        $user = User::find($id);
-        return view('users.show', compact('user'));
+        return User::find($id);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     * @return Application|Factory|View
-     */
-    public function edit(int $id): View|Factory|Application
-    {
-        $user = User::find($id);
-        return view('users.edit', compact('user'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return RedirectResponse
-     * @throws ValidationException
-     */
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(Request $request, int $id)
     {
         $this->validate($request, [
             'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'same:confirm-password',
-            'image' => 'mimes:jpg,jpeg,png|max:8096'
+            'email' => 'required|email|unique:users,email',
+            'date_of_birth' => 'required|date',
         ]);
 
         $input = $request->all();
-        if (!empty($input['password'])) {
-            $input['password'] = Hash::make($input['password']);
-        } else {
-            $input = Arr::except($input, array('password'));
-        }
 
         $user = User::find($id);
         $user->update($input);
@@ -139,7 +81,7 @@ class UserController extends Controller
     }
 
 
-    public function listTodo(Request $request): \Illuminate\Http\JsonResponse
+    public function listTodo(Request $request): JsonResponse
     {
         $id = $request->get('id');
         $todos = User::where('id', $id)->first()->getTodos()->get();
