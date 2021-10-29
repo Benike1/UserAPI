@@ -1,6 +1,6 @@
 BIGFISH user api próbafeledat.
 
-1. Create a database.
+1. Create a MySQL database.
 2. Set up the db attributes in .env file.
 3. Run migrations, and seeders (command: php artisan migrate --seed).
 4. Necessary api endpoints:
