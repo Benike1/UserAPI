@@ -29,7 +29,6 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'date_of_birth' => 'required|date',
-            'phone.user_id' => 'required',
             'phone.number' => ['required', 'regex:/((?:\+?3|0)6)(?:-|\()?(\d{1,2})(?:-|\))?(\d{3})-?(\d{3,4})/']
         ]);
 
@@ -38,7 +37,6 @@ class UserController extends Controller
         }
 
         $phone = new Phone([
-            'user_id' => $request['phone.user_id'],
             'number' => $request['phone.number'],
         ]);
         $user->phoneNumbers()->save($phone);
@@ -53,6 +51,15 @@ class UserController extends Controller
     public function show(int $id): mixed
     {
         return User::find($id);
+    }
+
+    /**
+     * @param $name
+     * @return mixed
+     */
+    public function search($name)
+    {
+        return User::where('name', 'like', '%' . $name . '%')->get();
     }
 
     /**

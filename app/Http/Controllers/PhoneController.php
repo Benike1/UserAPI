@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Phone;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 
 class PhoneController extends Controller
 {
@@ -25,12 +25,17 @@ class PhoneController extends Controller
     public function store(Request $request): mixed
     {
         $request->validate([
-            'user_id' => 'required',
-            'phone' => 'required|regex:/((?:\+?3|0)6)(?:-|\()?(\d{1,2})(?:-|\))?(\d{3})-?(\d{3,4})/',
+            'user_id' => ['required',Rule::unique('phones')->where(function ($query) use ($request) {
+                return $query->where('number', $request->number);
+            })],
+            'number' => ['required', 'regex:/((?:\+?3|0)6)(?:-|\()?(\d{1,2})(?:-|\))?(\d{3})-?(\d{3,4})/'],
+        ],[
+            'user_id.unique' => 'User already have this phone number.'
         ]);
 
         return Phone::create($request->all());
     }
+
     /**
      * @param int $id
      * @return mixed
