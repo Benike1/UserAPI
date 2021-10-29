@@ -28,7 +28,7 @@ class PhoneController extends Controller
             'user_id' => ['required',Rule::unique('phones')->where(function ($query) use ($request) {
                 return $query->where('number', $request->number);
             })],
-            'number' => ['required', 'regex:/((?:\+?3|0)6)(?:-|\()?(\d{1,2})(?:-|\))?(\d{3})-?(\d{3,4})/'],
+            'number' => ['required', 'regex:/((?:\+?3|0)6)(?:-|\()?(\d{1,2})(?:-|\))?(\d{3})-?(\d{3,4})/', 'min:11'],
         ],[
             'user_id.unique' => 'User already have this phone number.'
         ]);

@@ -29,7 +29,7 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'date_of_birth' => 'required|date',
-            'phone.number' => ['required', 'regex:/((?:\+?3|0)6)(?:-|\()?(\d{1,2})(?:-|\))?(\d{3})-?(\d{3,4})/']
+            'phone.number' => ['required', 'regex:/((?:\+?3|0)6)(?:-|\()?(\d{1,2})(?:-|\))?(\d{3})-?(\d{3,4})/', 'min:11']
         ]);
 
         if (!$user = User::create($request->all())) {
